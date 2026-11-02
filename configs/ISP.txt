@@ -1,0 +1,30 @@
+! =====================================================================
+!  ISP — routeur Cisco 2911 qui simule Internet
+!  G0/0 -> R-SIEGE   203.0.113.1/30
+!  G0/1 -> R-AGENCE  198.51.100.1/30
+!  G0/2 -> SRV-INTERNET (web + DNS public) 192.0.2.1/24
+!  Aucune route vers les réseaux privés : seuls les adresses publiques sont joignables.
+! =====================================================================
+enable
+configure terminal
+hostname ISP
+no ip domain-lookup
+enable secret Cisco#Lab2026!
+service password-encryption
+banner motd # Routeur fournisseur d'acces - simulation #
+no ip http server
+
+interface GigabitEthernet0/0
+ description Vers R-SIEGE
+ ip address 203.0.113.1 255.255.255.252
+ no shutdown
+interface GigabitEthernet0/1
+ description Vers R-AGENCE
+ ip address 198.51.100.1 255.255.255.252
+ no shutdown
+interface GigabitEthernet0/2
+ description Reseau "Internet" (SRV-INTERNET 192.0.2.10)
+ ip address 192.0.2.1 255.255.255.0
+ no shutdown
+end
+write memory

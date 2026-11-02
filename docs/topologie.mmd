@@ -1,0 +1,49 @@
+flowchart TB
+  subgraph INTERNET["Internet (simulé)"]
+    ISP["ISP<br/>Cisco 2911"]
+    WWW["SRV-INTERNET<br/>192.0.2.10<br/>web + DNS"]
+    ISP --- |"G0/2 · 192.0.2.0/24"| WWW
+  end
+
+  subgraph SIEGE["Siège — Bayonne · 10.10.0.0/16"]
+    RS["R-SIEGE<br/>Cisco 2911<br/>NAT · DHCP · VPN · OSPF"]
+    CORE["SW-CORE-SIEGE<br/>Cisco 3560 (L3)<br/>SVI · ACL · STP root"]
+    A1["SW-ACC1-SIEGE<br/>Cisco 2960"]
+    A2["SW-ACC2-SIEGE<br/>Cisco 2960"]
+    PCADM1["PC-ADM1<br/>VLAN 10"]
+    SRV["SRV-AD .10 · SRV-FICHIERS .20 · SRV-WEB .30<br/>VLAN 30 · 10.10.30.0/24"]
+    IT["PC-ADMIN-IT<br/>VLAN 99"]
+    PCC["PC-COMPTA1<br/>VLAN 20"]
+    PCADM2["PC-ADM2<br/>VLAN 10"]
+    GUEST["LAPTOP-INVITE<br/>VLAN 40"]
+    RS --- |"G0/1 ↔ Gi0/1 · 10.10.255.0/30"| CORE
+    CORE --- |"Fa0/1 ↔ Gi0/1 · trunk 10,30,99"| A1
+    CORE --- |"Fa0/2 ↔ Gi0/1 · trunk 10,20,40,99"| A2
+    A1 --- PCADM1
+    A1 --- SRV
+    A1 --- IT
+    A2 --- PCC
+    A2 --- PCADM2
+    A2 --- GUEST
+  end
+
+  subgraph AGENCE["Agence — Pau · 10.20.0.0/16"]
+    RA["R-AGENCE<br/>Cisco 2911<br/>router-on-a-stick · NAT · DHCP · VPN"]
+    SA["SW-AGENCE<br/>Cisco 2960"]
+    PA1["PC-AGENCE1<br/>VLAN 10"]
+    PA2["PC-AGENCE2<br/>VLAN 10"]
+    RA --- |"G0/1 ↔ Gi0/1 · trunk 10,99"| SA
+    SA --- PA1
+    SA --- PA2
+  end
+
+  RS --- |"G0/0 · 203.0.113.0/30"| ISP
+  RA --- |"G0/0 · 198.51.100.0/30"| ISP
+  RS -. "Tunnel0 GRE over IPsec · 172.16.0.0/30 · OSPF" .- RA
+
+  classDef router fill:#dbeafe,stroke:#1d4ed8,color:#0f172a
+  classDef switch fill:#dcfce7,stroke:#15803d,color:#0f172a
+  classDef host fill:#f8fafc,stroke:#64748b,color:#0f172a
+  class ISP,RS,RA router
+  class CORE,A1,A2,SA switch
+  class PCADM1,SRV,IT,PCC,PCADM2,GUEST,PA1,PA2,WWW host

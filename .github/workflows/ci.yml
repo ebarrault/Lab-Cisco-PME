@@ -1,0 +1,16 @@
+name: Contrôle des configurations
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  configs:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Durcissement, adresses en double, VLAN, VPN
+        run: python tests/check_configs.py
